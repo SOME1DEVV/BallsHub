@@ -1161,7 +1161,7 @@ end
 
 task.spawn(function()
     while true do
-        if not ScopeRemoved and not Exiting then
+        if ScopeRemoved and not Exiting then
             if IsSniperEquipped() then
                 CreateCrosshair()
             else
