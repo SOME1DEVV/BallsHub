@@ -8,17 +8,17 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Camera = Workspace.CurrentCamera
 
-local Settings = {
-    K = Enum.KeyCode.RightControl,
+local State = {
     E = false,
     We = false,
     Af = false,
     As = false,
     He = false,
     Hv = 2,
-    Rw = false,
-    Th = 1
+    Rw = false
 }
+
+local MenuKey = Enum.KeyCode.RightControl
 
 local Keybinds = {
     ESP = Enum.KeyCode.None,
@@ -34,32 +34,6 @@ local PlayerList = {}
 local Exiting = false
 local IntroDone = false
 local ExitStarted = false
-
-local Themes = {
-    {n="Default", bg=Color3.fromRGB(45,45,45), tb=Color3.fromRGB(35,35,35), b=Color3.fromRGB(80,80,80), t=Color3.fromRGB(255,255,255), on=Color3.fromRGB(0,120,0), off=Color3.fromRGB(80,80,80)},
-    {n="Crimson", bg=Color3.fromRGB(60,25,25), tb=Color3.fromRGB(40,15,15), b=Color3.fromRGB(140,40,40), t=Color3.fromRGB(255,200,200), on=Color3.fromRGB(180,40,40), off=Color3.fromRGB(100,30,30)},
-    {n="Ocean", bg=Color3.fromRGB(25,40,60), tb=Color3.fromRGB(15,25,40), b=Color3.fromRGB(40,90,150), t=Color3.fromRGB(200,230,255), on=Color3.fromRGB(40,90,150), off=Color3.fromRGB(30,70,120)},
-    {n="Forest", bg=Color3.fromRGB(25,50,25), tb=Color3.fromRGB(15,35,15), b=Color3.fromRGB(50,120,50), t=Color3.fromRGB(200,255,200), on=Color3.fromRGB(50,120,50), off=Color3.fromRGB(40,90,40)},
-    {n="Sunset", bg=Color3.fromRGB(80,40,20), tb=Color3.fromRGB(60,25,10), b=Color3.fromRGB(200,100,50), t=Color3.fromRGB(255,230,200), on=Color3.fromRGB(200,100,50), off=Color3.fromRGB(160,80,40)},
-    {n="Purple", bg=Color3.fromRGB(50,25,70), tb=Color3.fromRGB(35,15,50), b=Color3.fromRGB(120,60,180), t=Color3.fromRGB(230,200,255), on=Color3.fromRGB(120,60,180), off=Color3.fromRGB(90,45,140)},
-    {n="Gold", bg=Color3.fromRGB(70,55,20), tb=Color3.fromRGB(50,40,10), b=Color3.fromRGB(200,170,40), t=Color3.fromRGB(255,245,200), on=Color3.fromRGB(200,170,40), off=Color3.fromRGB(150,130,30)},
-    {n="Pink", bg=Color3.fromRGB(70,30,50), tb=Color3.fromRGB(50,20,35), b=Color3.fromRGB(220,80,160), t=Color3.fromRGB(255,220,240), on=Color3.fromRGB(220,80,160), off=Color3.fromRGB(160,60,120)},
-    {n="Mint", bg=Color3.fromRGB(30,60,55), tb=Color3.fromRGB(20,45,40), b=Color3.fromRGB(80,200,180), t=Color3.fromRGB(210,255,250), on=Color3.fromRGB(80,200,180), off=Color3.fromRGB(50,140,130)},
-    {n="Cyber", bg=Color3.fromRGB(20,20,40), tb=Color3.fromRGB(10,10,25), b=Color3.fromRGB(0,220,255), t=Color3.fromRGB(200,255,255), on=Color3.fromRGB(0,220,255), off=Color3.fromRGB(0,130,160)},
-    {n="Blood", bg=Color3.fromRGB(50,0,0), tb=Color3.fromRGB(35,0,0), b=Color3.fromRGB(180,0,0), t=Color3.fromRGB(255,200,200), on=Color3.fromRGB(180,0,0), off=Color3.fromRGB(120,0,0)},
-    {n="Ice", bg=Color3.fromRGB(40,60,80), tb=Color3.fromRGB(25,40,60), b=Color3.fromRGB(120,200,255), t=Color3.fromRGB(220,245,255), on=Color3.fromRGB(120,200,255), off=Color3.fromRGB(70,140,200)}
-}
-
-local GradThemes = {
-    {n="Rainbow", c1=Color3.fromRGB(255,0,0), c2=Color3.fromRGB(0,0,255), off=Color3.fromRGB(80,80,80)},
-    {n="Fire", c1=Color3.fromRGB(255,200,0), c2=Color3.fromRGB(255,0,0), off=Color3.fromRGB(150,60,0)},
-    {n="Lava", c1=Color3.fromRGB(255,100,0), c2=Color3.fromRGB(100,0,0), off=Color3.fromRGB(120,30,0)},
-    {n="Sky", c1=Color3.fromRGB(0,200,255), c2=Color3.fromRGB(255,255,255), off=Color3.fromRGB(80,140,180)},
-    {n="Galaxy", c1=Color3.fromRGB(100,0,200), c2=Color3.fromRGB(0,100,255), off=Color3.fromRGB(60,40,140)},
-    {n="Matrix", c1=Color3.fromRGB(0,255,0), c2=Color3.fromRGB(0,50,0), off=Color3.fromRGB(0,100,50)},
-    {n="Cherry", c1=Color3.fromRGB(255,0,100), c2=Color3.fromRGB(200,0,0), off=Color3.fromRGB(140,20,80)},
-    {n="Toxic", c1=Color3.fromRGB(200,255,0), c2=Color3.fromRGB(0,150,50), off=Color3.fromRGB(80,120,20)}
-}
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "BallsHub"
@@ -206,16 +180,6 @@ ContentFrame.BorderColor3 = Color3.fromRGB(100,100,100)
 ContentFrame.ZIndex = 2
 ContentFrame.Parent = MainFrame
 
-local function GetThemeColors()
-    if Settings.Th <= #Themes then
-        local theme = Themes[Settings.Th]
-        return theme.on or theme.b, theme.off, theme.b, theme.t
-    else
-        local grad = GradThemes[Settings.Th - #Themes]
-        return grad.c1, grad.off, grad.c1, Color3.fromRGB(255,255,255)
-    end
-end
-
 local function CreateFeatureButton(name, text, y, key)
     local button = Instance.new("TextButton")
     button.Name = name .. "Button"
@@ -261,16 +225,14 @@ local function CreateFeatureButton(name, text, y, key)
 
     keybindButton.MouseButton1Click:Connect(function()
         keybindButton.Text = "Press key..."
-        local _, _, mainColor = GetThemeColors()
-        keybindButton.BackgroundColor3 = mainColor
+        keybindButton.BackgroundColor3 = Color3.fromRGB(0,120,0)
         local conn
         conn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
             if gameProcessed then return end
             if input.UserInputType == Enum.UserInputType.Keyboard then
                 Keybinds[key] = input.KeyCode
                 keybindButton.Text = "Key: " .. tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
-                local _, off = GetThemeColors()
-                keybindButton.BackgroundColor3 = off
+                keybindButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
                 conn:Disconnect()
             end
         end)
@@ -279,8 +241,7 @@ local function CreateFeatureButton(name, text, y, key)
     resetButton.MouseButton1Click:Connect(function()
         Keybinds[key] = Enum.KeyCode.None
         keybindButton.Text = "Key: None"
-        local _, off = GetThemeColors()
-        keybindButton.BackgroundColor3 = off
+        keybindButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
     end)
 
     return button
@@ -392,8 +353,7 @@ YesButton.MouseButton1Click:Connect(function()
         end
     end
     ScopeRemoved = true
-    local _, _, mainColor = GetThemeColors()
-    ScopeButton.BackgroundColor3 = mainColor
+    ScopeButton.BackgroundColor3 = Color3.fromRGB(0,120,0)
     ScopeButton.Text = "Removed Scope"
     ScopeButton.TextColor3 = Color3.fromRGB(200,200,200)
     ScopeButton.AutoButtonColor = false
@@ -440,16 +400,14 @@ BigHeadReset.Parent = ContentFrame
 
 BigHeadKeybind.MouseButton1Click:Connect(function()
     BigHeadKeybind.Text = "Press key..."
-    local _, _, mainColor = GetThemeColors()
-    BigHeadKeybind.BackgroundColor3 = mainColor
+    BigHeadKeybind.BackgroundColor3 = Color3.fromRGB(0,120,0)
     local conn
     conn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
         if input.UserInputType == Enum.UserInputType.Keyboard then
             Keybinds.BigHead = input.KeyCode
             BigHeadKeybind.Text = "Key: " .. tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
-            local _, off = GetThemeColors()
-            BigHeadKeybind.BackgroundColor3 = off
+            BigHeadKeybind.BackgroundColor3 = Color3.fromRGB(60,60,60)
             conn:Disconnect()
         end
     end)
@@ -458,8 +416,7 @@ end)
 BigHeadReset.MouseButton1Click:Connect(function()
     Keybinds.BigHead = Enum.KeyCode.None
     BigHeadKeybind.Text = "Key: None"
-    local _, off = GetThemeColors()
-    BigHeadKeybind.BackgroundColor3 = off
+    BigHeadKeybind.BackgroundColor3 = Color3.fromRGB(60,60,60)
 end)
 
 local BigHeadSettingsButton = Instance.new("TextButton")
@@ -474,19 +431,6 @@ BigHeadSettingsButton.Font = Enum.Font.Legacy
 BigHeadSettingsButton.TextSize = 14
 BigHeadSettingsButton.ZIndex = 3
 BigHeadSettingsButton.Parent = ContentFrame
-
-local SettingsButton = Instance.new("TextButton")
-SettingsButton.Size = UDim2.new(0,180,0,35)
-SettingsButton.Position = UDim2.new(0,15,0,295)
-SettingsButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
-SettingsButton.BorderSizePixel = 1
-SettingsButton.BorderColor3 = Color3.fromRGB(100,100,100)
-SettingsButton.Text = "Settings"
-SettingsButton.TextColor3 = Color3.fromRGB(255,255,255)
-SettingsButton.Font = Enum.Font.Legacy
-SettingsButton.TextSize = 14
-SettingsButton.ZIndex = 3
-SettingsButton.Parent = ContentFrame
 
 local HeadSliderLabel = Instance.new("TextLabel")
 HeadSliderLabel.Size = UDim2.new(0,50,0,20)
@@ -524,7 +468,7 @@ MenuKeyButton.Position = UDim2.new(0,15,0,430)
 MenuKeyButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
 MenuKeyButton.BorderSizePixel = 1
 MenuKeyButton.BorderColor3 = Color3.fromRGB(100,100,100)
-MenuKeyButton.Text = "Menu Key: " .. tostring(Settings.K):gsub("Enum.KeyCode.", "")
+MenuKeyButton.Text = "Menu Key: " .. tostring(MenuKey):gsub("Enum.KeyCode.", "")
 MenuKeyButton.TextColor3 = Color3.fromRGB(255,255,255)
 MenuKeyButton.Font = Enum.Font.Legacy
 MenuKeyButton.TextSize = 12
@@ -626,368 +570,6 @@ PlayersScroll.Parent = PlayersFrame
 
 local PlayerButtons = {}
 
-local SettingsFrame = Instance.new("Frame")
-SettingsFrame.Name = "SettingsFrame"
-SettingsFrame.Size = UDim2.new(0,450,0,420)
-SettingsFrame.Position = UDim2.new(0.5,-225,0.5,-210)
-SettingsFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
-SettingsFrame.BorderSizePixel = 1
-SettingsFrame.BorderColor3 = Color3.fromRGB(150,150,150)
-SettingsFrame.Visible = false
-SettingsFrame.Parent = ScreenGui
-
-local SettingsTitleBar = Instance.new("Frame")
-SettingsTitleBar.Size = UDim2.new(1,-2,0,35)
-SettingsTitleBar.Position = UDim2.new(0,1,0,1)
-SettingsTitleBar.BackgroundColor3 = Color3.fromRGB(35,35,35)
-SettingsTitleBar.BorderSizePixel = 1
-SettingsTitleBar.BorderColor3 = Color3.fromRGB(100,100,100)
-SettingsTitleBar.ZIndex = 2
-SettingsTitleBar.Parent = SettingsFrame
-
-local SettingsBackButton = Instance.new("TextButton")
-SettingsBackButton.Size = UDim2.new(0,35,0,30)
-SettingsBackButton.Position = UDim2.new(0,5,0,2)
-SettingsBackButton.BackgroundColor3 = Color3.fromRGB(60,140,200)
-SettingsBackButton.BorderSizePixel = 1
-SettingsBackButton.BorderColor3 = Color3.fromRGB(100,100,100)
-SettingsBackButton.Text = "<"
-SettingsBackButton.TextColor3 = Color3.fromRGB(255,255,255)
-SettingsBackButton.Font = Enum.Font.Legacy
-SettingsBackButton.TextSize = 20
-SettingsBackButton.ZIndex = 3
-SettingsBackButton.Parent = SettingsTitleBar
-
-local SettingsTitle = Instance.new("TextLabel")
-SettingsTitle.Size = UDim2.new(0,300,1,0)
-SettingsTitle.Position = UDim2.new(0,50,0,0)
-SettingsTitle.BackgroundTransparency = 1
-SettingsTitle.Text = "Settings - Theme"
-SettingsTitle.TextColor3 = Color3.fromRGB(255,255,255)
-SettingsTitle.Font = Enum.Font.Legacy
-SettingsTitle.TextSize = 16
-SettingsTitle.TextXAlignment = Enum.TextXAlignment.Left
-SettingsTitle.ZIndex = 3
-SettingsTitle.Parent = SettingsTitleBar
-
-local SettingsCloseButton = Instance.new("TextButton")
-SettingsCloseButton.Size = UDim2.new(0,30,0,30)
-SettingsCloseButton.Position = UDim2.new(1,-32,0,2)
-SettingsCloseButton.BackgroundColor3 = Color3.fromRGB(180,40,40)
-SettingsCloseButton.BorderSizePixel = 1
-SettingsCloseButton.BorderColor3 = Color3.fromRGB(100,100,100)
-SettingsCloseButton.Text = "X"
-SettingsCloseButton.TextColor3 = Color3.fromRGB(255,255,255)
-SettingsCloseButton.Font = Enum.Font.Legacy
-SettingsCloseButton.TextSize = 16
-SettingsCloseButton.ZIndex = 3
-SettingsCloseButton.Parent = SettingsTitleBar
-
-local SettingsScroll = Instance.new("ScrollingFrame")
-SettingsScroll.Size = UDim2.new(1,-2,1,-37)
-SettingsScroll.Position = UDim2.new(0,1,0,36)
-SettingsScroll.BackgroundColor3 = Color3.fromRGB(45,45,45)
-SettingsScroll.BorderSizePixel = 1
-SettingsScroll.BorderColor3 = Color3.fromRGB(100,100,100)
-SettingsScroll.ScrollBarThickness = 8
-SettingsScroll.CanvasSize = UDim2.new(0,0,0,0)
-SettingsScroll.ZIndex = 2
-SettingsScroll.Parent = SettingsFrame
-
-local ThemeButtons = {}
-
-local function ApplyTheme(index)
-    local clearGradients = function(obj)
-        if not obj then return end
-        for _, child in pairs(obj:GetChildren()) do
-            if child:IsA("UIGradient") then
-                child:Destroy()
-            end
-        end
-    end
-
-    local applyColor = function(btn, color)
-        if not btn then return end
-        clearGradients(btn)
-        btn.BackgroundColor3 = color
-    end
-
-    local applyGradient = function(btn, c1, c2)
-        if not btn then return end
-        clearGradients(btn)
-        local gradient = Instance.new("UIGradient")
-        gradient.Color = ColorSequence.new(c1, c2)
-        gradient.Rotation = 90
-        gradient.Parent = btn
-        btn.BackgroundColor3 = Color3.fromRGB(150,150,150)
-    end
-
-    local applyTextColor = function(label, color)
-        if not label then return end
-        label.TextColor3 = color
-    end
-
-    local mainButtons = {ESPButton, WeaponESPButton, AntiFlashButton, AntiSmokeButton, ScopeButton, BigHeadButton, BigHeadSettingsButton, SettingsButton, RemoveWallsButton, MenuKeyButton, MenuKeyReset, CloseButton, PlayersCloseButton, SettingsCloseButton}
-    local keyButtons = {}
-    local resetButtons = {}
-
-    for _, name in ipairs({"ESP", "WeaponESP", "AntiFlash", "AntiSmoke", "RemoveWalls"}) do
-        local kb = ContentFrame:FindFirstChild(name .. "Keybind")
-        local rb = ContentFrame:FindFirstChild(name .. "ResetKey")
-        if kb then table.insert(keyButtons, kb) end
-        if rb then table.insert(resetButtons, rb) end
-    end
-
-    table.insert(keyButtons, BigHeadKeybind)
-    table.insert(resetButtons, BigHeadReset)
-    table.insert(resetButtons, MenuKeyReset)
-
-    local settingsButtons = {PlayersBackButton, SettingsBackButton}
-    local settingsFrames = {PlayersFrame, PlayersTitleBar, SettingsFrame, SettingsTitleBar, PlayersScroll, SettingsScroll}
-
-    if index == 1 then
-        local theme = Themes[1]
-        applyColor(ContentFrame, theme.bg)
-        applyColor(TitleBar, theme.tb)
-        applyColor(MainFrame, theme.bg)
-        applyColor(HeadSlider, Color3.fromRGB(100,100,100))
-        applyColor(HeadSliderFill, theme.on)
-
-        for _, f in ipairs(settingsFrames) do applyColor(f, theme.bg) end
-        applyColor(PlayersTitleBar, theme.tb)
-        applyColor(SettingsTitleBar, theme.tb)
-
-        for _, b in ipairs(mainButtons) do applyColor(b, theme.b) end
-        for _, b in ipairs(keyButtons) do applyColor(b, theme.off) end
-        for _, b in ipairs(resetButtons) do applyColor(b, Color3.fromRGB(120,40,40)) end
-        for _, b in ipairs(settingsButtons) do applyColor(b, theme.b) end
-
-        applyTextColor(TitleLabel, theme.t)
-        applyTextColor(VersionLabel, theme.t)
-        applyTextColor(HeadSliderLabel, theme.t)
-        applyTextColor(StatusLabel, theme.t)
-        applyTextColor(PlayersTitle, theme.t)
-        applyTextColor(SettingsTitle, theme.t)
-        applyTextColor(ESPButton, theme.t)
-        applyTextColor(WeaponESPButton, theme.t)
-        applyTextColor(AntiFlashButton, theme.t)
-        applyTextColor(AntiSmokeButton, theme.t)
-        applyTextColor(BigHeadButton, theme.t)
-        applyTextColor(BigHeadSettingsButton, theme.t)
-        applyTextColor(SettingsButton, theme.t)
-        applyTextColor(RemoveWallsButton, theme.t)
-        applyTextColor(MenuKeyButton, theme.t)
-
-        if Settings.E then ESPButton.BackgroundColor3 = theme.on else ESPButton.BackgroundColor3 = theme.off end
-        if Settings.We then WeaponESPButton.BackgroundColor3 = theme.on else WeaponESPButton.BackgroundColor3 = theme.off end
-        if Settings.Af then AntiFlashButton.BackgroundColor3 = theme.on else AntiFlashButton.BackgroundColor3 = theme.off end
-        if Settings.As then AntiSmokeButton.BackgroundColor3 = theme.on else AntiSmokeButton.BackgroundColor3 = theme.off end
-        if Settings.He then BigHeadButton.BackgroundColor3 = theme.on else BigHeadButton.BackgroundColor3 = theme.off end
-        if Settings.Rw then RemoveWallsButton.BackgroundColor3 = theme.on else RemoveWallsButton.BackgroundColor3 = theme.off end
-
-        if ScopeRemoved then
-            ScopeButton.BackgroundColor3 = theme.on
-            ScopeButton.TextColor3 = Color3.fromRGB(200,200,200)
-        else
-            ScopeButton.TextColor3 = theme.t
-        end
-    elseif index > #Themes then
-        local grad = GradThemes[index - #Themes]
-
-        applyGradient(ContentFrame, grad.c1, grad.c2)
-        applyGradient(TitleBar, grad.c1, grad.c2)
-        applyGradient(MainFrame, grad.c1, grad.c2)
-        applyGradient(HeadSlider, grad.c1, grad.c2)
-        applyGradient(HeadSliderFill, grad.c1:lerp(Color3.new(1,1,1), 0.35), grad.c2:lerp(Color3.new(1,1,1), 0.35))
-
-        for _, f in ipairs(settingsFrames) do applyGradient(f, grad.c1, grad.c2) end
-        applyGradient(PlayersTitleBar, grad.c1, grad.c2)
-        applyGradient(SettingsTitleBar, grad.c1, grad.c2)
-
-        for _, b in ipairs(mainButtons) do applyGradient(b, grad.c1, grad.c2) end
-        for _, b in ipairs(keyButtons) do
-            clearGradients(b)
-            b.BackgroundColor3 = grad.off
-        end
-        for _, b in ipairs(resetButtons) do applyColor(b, Color3.fromRGB(120,40,40)) end
-        for _, b in ipairs(settingsButtons) do applyGradient(b, grad.c1, grad.c2) end
-
-        applyTextColor(TitleLabel, Color3.fromRGB(255,255,255))
-        applyTextColor(VersionLabel, Color3.fromRGB(255,215,0))
-        applyTextColor(HeadSliderLabel, Color3.fromRGB(255,255,255))
-        applyTextColor(StatusLabel, Color3.fromRGB(255,255,0))
-        applyTextColor(PlayersTitle, Color3.fromRGB(255,255,255))
-        applyTextColor(SettingsTitle, Color3.fromRGB(255,255,255))
-        applyTextColor(ESPButton, Color3.fromRGB(255,255,255))
-        applyTextColor(WeaponESPButton, Color3.fromRGB(255,255,255))
-        applyTextColor(AntiFlashButton, Color3.fromRGB(255,255,255))
-        applyTextColor(AntiSmokeButton, Color3.fromRGB(255,255,255))
-        applyTextColor(BigHeadButton, Color3.fromRGB(255,255,255))
-        applyTextColor(BigHeadSettingsButton, Color3.fromRGB(255,255,255))
-        applyTextColor(SettingsButton, Color3.fromRGB(255,255,255))
-        applyTextColor(RemoveWallsButton, Color3.fromRGB(255,255,255))
-        applyTextColor(MenuKeyButton, Color3.fromRGB(255,255,255))
-
-        local onColor = grad.c1
-        if Settings.E then ESPButton.BackgroundColor3 = onColor else ESPButton.BackgroundColor3 = grad.off end
-        if Settings.We then WeaponESPButton.BackgroundColor3 = onColor else WeaponESPButton.BackgroundColor3 = grad.off end
-        if Settings.Af then AntiFlashButton.BackgroundColor3 = onColor else AntiFlashButton.BackgroundColor3 = grad.off end
-        if Settings.As then AntiSmokeButton.BackgroundColor3 = onColor else AntiSmokeButton.BackgroundColor3 = grad.off end
-        if Settings.He then BigHeadButton.BackgroundColor3 = onColor else BigHeadButton.BackgroundColor3 = grad.off end
-        if Settings.Rw then RemoveWallsButton.BackgroundColor3 = onColor else RemoveWallsButton.BackgroundColor3 = grad.off end
-
-        if ScopeRemoved then
-            ScopeButton.BackgroundColor3 = onColor
-            ScopeButton.TextColor3 = Color3.fromRGB(200,200,200)
-        else
-            ScopeButton.TextColor3 = Color3.fromRGB(255,255,255)
-        end
-    else
-        local theme = Themes[index]
-
-        applyColor(ContentFrame, theme.bg)
-        applyColor(TitleBar, theme.tb)
-        applyColor(MainFrame, theme.bg)
-        applyColor(HeadSlider, Color3.fromRGB(100,100,100))
-        applyColor(HeadSliderFill, theme.on or theme.b)
-
-        for _, f in ipairs(settingsFrames) do applyColor(f, theme.bg) end
-        applyColor(PlayersTitleBar, theme.tb)
-        applyColor(SettingsTitleBar, theme.tb)
-
-        for _, b in ipairs(mainButtons) do applyColor(b, theme.b) end
-        for _, b in ipairs(keyButtons) do applyColor(b, theme.off) end
-        for _, b in ipairs(resetButtons) do applyColor(b, Color3.fromRGB(120,40,40)) end
-        for _, b in ipairs(settingsButtons) do applyColor(b, theme.b) end
-
-        applyTextColor(TitleLabel, theme.t)
-        applyTextColor(VersionLabel, theme.t)
-        applyTextColor(HeadSliderLabel, theme.t)
-        applyTextColor(StatusLabel, theme.t)
-        applyTextColor(PlayersTitle, theme.t)
-        applyTextColor(SettingsTitle, theme.t)
-        applyTextColor(ESPButton, theme.t)
-        applyTextColor(WeaponESPButton, theme.t)
-        applyTextColor(AntiFlashButton, theme.t)
-        applyTextColor(AntiSmokeButton, theme.t)
-        applyTextColor(BigHeadButton, theme.t)
-        applyTextColor(BigHeadSettingsButton, theme.t)
-        applyTextColor(SettingsButton, theme.t)
-        applyTextColor(RemoveWallsButton, theme.t)
-        applyTextColor(MenuKeyButton, theme.t)
-
-        local onColor = theme.on or theme.b
-        if Settings.E then ESPButton.BackgroundColor3 = onColor else ESPButton.BackgroundColor3 = theme.off end
-        if Settings.We then WeaponESPButton.BackgroundColor3 = onColor else WeaponESPButton.BackgroundColor3 = theme.off end
-        if Settings.Af then AntiFlashButton.BackgroundColor3 = onColor else AntiFlashButton.BackgroundColor3 = theme.off end
-        if Settings.As then AntiSmokeButton.BackgroundColor3 = onColor else AntiSmokeButton.BackgroundColor3 = theme.off end
-        if Settings.He then BigHeadButton.BackgroundColor3 = onColor else BigHeadButton.BackgroundColor3 = theme.off end
-        if Settings.Rw then RemoveWallsButton.BackgroundColor3 = onColor else RemoveWallsButton.BackgroundColor3 = theme.off end
-
-        if ScopeRemoved then
-            ScopeButton.BackgroundColor3 = onColor
-            ScopeButton.TextColor3 = Color3.fromRGB(200,200,200)
-        else
-            ScopeButton.TextColor3 = theme.t
-        end
-    end
-
-    for i, b in ipairs(ThemeButtons) do
-        if i == index then
-            b.BorderColor3 = Color3.fromRGB(0,255,0)
-            b.BorderSizePixel = 3
-        else
-            b.BorderColor3 = Color3.fromRGB(100,100,100)
-            b.BorderSizePixel = 1
-        end
-    end
-
-    Settings.Th = index
-end
-
-for i, theme in ipairs(Themes) do
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0,80,0,60)
-    button.Position = UDim2.new(0, 10 + ((i-1) % 5) * 88, 0, 10 + math.floor((i-1) / 5) * 70)
-    button.BackgroundColor3 = theme.b
-    button.BorderSizePixel = 1
-    button.BorderColor3 = Color3.fromRGB(100,100,100)
-    button.Text = theme.n
-    button.TextColor3 = Color3.fromRGB(255,255,255)
-    button.Font = Enum.Font.Legacy
-    button.TextSize = 12
-    button.ZIndex = 3
-    button.Parent = SettingsScroll
-    ThemeButtons[i] = button
-    button.MouseButton1Click:Connect(function() ApplyTheme(i) end)
-end
-
-local gradientStart = #Themes
-
-for i, grad in ipairs(GradThemes) do
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0,80,0,60)
-    button.Position = UDim2.new(0, 10 + ((i-1) % 5) * 88, 0, 10 + math.floor((i-1+gradientStart) / 5) * 70)
-    button.BackgroundColor3 = Color3.fromRGB(150,150,150)
-    button.BorderSizePixel = 1
-    button.BorderColor3 = Color3.fromRGB(100,100,100)
-    button.Text = grad.n
-    button.TextColor3 = Color3.fromRGB(255,255,255)
-    button.Font = Enum.Font.Legacy
-    button.TextSize = 12
-    button.ZIndex = 3
-    button.Parent = SettingsScroll
-
-    local gr = Instance.new("UIGradient")
-    gr.Color = ColorSequence.new(grad.c1, grad.c2)
-    gr.Rotation = 90
-    gr.Parent = button
-
-    ThemeButtons[gradientStart + i] = button
-    button.MouseButton1Click:Connect(function() ApplyTheme(gradientStart + i) end)
-end
-
-SettingsScroll.CanvasSize = UDim2.new(0,0,0, 10 + math.ceil((#Themes + #GradThemes) / 5) * 70 + 10)
-
-SettingsButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
-    SettingsFrame.Visible = true
-end)
-
-SettingsBackButton.MouseButton1Click:Connect(function()
-    SettingsFrame.Visible = false
-    MainFrame.Visible = true
-end)
-
-SettingsCloseButton.MouseButton1Click:Connect(function()
-    SettingsFrame.Visible = false
-    MainFrame.Visible = true
-end)
-
-local settingsDragging = false
-local settingsDragStart = nil
-local settingsStartPos = nil
-
-SettingsTitleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        settingsDragging = true
-        settingsDragStart = input.Position
-        settingsStartPos = SettingsFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                settingsDragging = false
-            end
-        end)
-    end
-end)
-
-SettingsTitleBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement and settingsDragging then
-        local delta = input.Position - settingsDragStart
-        SettingsFrame.Position = UDim2.new(settingsStartPos.X.Scale, settingsStartPos.X.Offset + delta.X, settingsStartPos.Y.Scale, settingsStartPos.Y.Offset + delta.Y)
-    end
-end)
-
 local function UpdatePlayerList()
     local currentPlayers = {}
 
@@ -1032,11 +614,10 @@ local function UpdatePlayerList()
             PlayerToggles[name] = true
             button.MouseButton1Click:Connect(function()
                 PlayerToggles[name] = not PlayerToggles[name]
-                local on, off = GetThemeColors()
                 if PlayerToggles[name] then
-                    button.BackgroundColor3 = on
+                    button.BackgroundColor3 = Color3.fromRGB(0,120,0)
                 else
-                    button.BackgroundColor3 = off
+                    button.BackgroundColor3 = Color3.fromRGB(80,80,80)
                 end
             end)
             PlayerButtons[name] = button
@@ -1226,7 +807,7 @@ end
 local function UpdateWeapons()
     for _, data in pairs(ESPElements) do
         if data.WeaponLabel and data.WeaponLabel.Parent and data.Model and data.Model.Parent then
-            if Settings.E and Settings.We then
+            if State.E and State.We then
                 local weapons = GetWeapons(data.Model)
                 if #weapons > 0 then
                     data.WeaponLabel.Text = "Weapons: " .. table.concat(weapons, ", ")
@@ -1262,7 +843,7 @@ local function UpdateESP()
         if oldBillboard then oldBillboard:Destroy() end
     end
 
-    if not Settings.E then return end
+    if not State.E then return end
 
     for _, model in pairs(Characters:GetChildren()) do
         if model:IsA("Model") and model.Name ~= LocalPlayer.Name then
@@ -1308,25 +889,25 @@ local function IsSmokeEffect(obj)
 end
 
 PlayerGui.ChildAdded:Connect(function(child)
-    if Settings.Af and IsFlashEffect(child) then
+    if State.Af and IsFlashEffect(child) then
         child:Destroy()
     end
 end)
 
 PlayerGui.DescendantAdded:Connect(function(descendant)
-    if Settings.Af and IsFlashEffect(descendant) then
+    if State.Af and IsFlashEffect(descendant) then
         descendant:Destroy()
     end
 end)
 
 Lighting.ChildAdded:Connect(function(child)
-    if Settings.Af and IsFlashEffect(child) then
+    if State.Af and IsFlashEffect(child) then
         child:Destroy()
     end
 end)
 
 Debris.ChildAdded:Connect(function(child)
-    if Settings.As and IsSmokeEffect(child) then
+    if State.As and IsSmokeEffect(child) then
         child:Destroy()
     end
 end)
@@ -1341,8 +922,8 @@ local function UpdateBigHead()
                 if not OriginalHeadSizes[model.Name] then
                     OriginalHeadSizes[model.Name] = head.Size
                 end
-                if Settings.He and PlayerToggles[model.Name] then
-                    head.Size = OriginalHeadSizes[model.Name] * Settings.Hv
+                if State.He and PlayerToggles[model.Name] then
+                    head.Size = OriginalHeadSizes[model.Name] * State.Hv
                 else
                     head.Size = OriginalHeadSizes[model.Name]
                 end
@@ -1361,9 +942,9 @@ HeadSlider.InputBegan:Connect(function(input)
         local sliderPos = HeadSlider.AbsolutePosition
         local sliderSize = HeadSlider.AbsoluteSize
         local ratio = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
-        Settings.Hv = 1 + (ratio * maxSliderValue)
+        State.Hv = 1 + (ratio * maxSliderValue)
         HeadSliderFill.Size = UDim2.new(ratio, 0, 1, 0)
-        HeadSliderLabel.Text = "x" .. string.format("%.1f", Settings.Hv)
+        HeadSliderLabel.Text = "x" .. string.format("%.1f", State.Hv)
         UpdateBigHead()
     end
 end)
@@ -1374,9 +955,9 @@ UserInputService.InputChanged:Connect(function(input)
         local sliderPos = HeadSlider.AbsolutePosition
         local sliderSize = HeadSlider.AbsoluteSize
         local ratio = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
-        Settings.Hv = 1 + (ratio * maxSliderValue)
+        State.Hv = 1 + (ratio * maxSliderValue)
         HeadSliderFill.Size = UDim2.new(ratio, 0, 1, 0)
-        HeadSliderLabel.Text = "x" .. string.format("%.1f", Settings.Hv)
+        HeadSliderLabel.Text = "x" .. string.format("%.1f", State.Hv)
         UpdateBigHead()
     end
 end)
@@ -1423,49 +1004,43 @@ local function ToggleWalls(enabled)
 end
 
 ESPButton.MouseButton1Click:Connect(function()
-    Settings.E = not Settings.E
-    local on, off = GetThemeColors()
-    ESPButton.Text = Settings.E and "Player ESP: ON" or "Player ESP: OFF"
-    ESPButton.BackgroundColor3 = Settings.E and on or off
+    State.E = not State.E
+    ESPButton.Text = State.E and "Player ESP: ON" or "Player ESP: OFF"
+    ESPButton.BackgroundColor3 = State.E and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
     UpdateESP()
 end)
 
 WeaponESPButton.MouseButton1Click:Connect(function()
-    Settings.We = not Settings.We
-    local on, off = GetThemeColors()
-    WeaponESPButton.Text = Settings.We and "Weapon ESP: ON" or "Weapon ESP: OFF"
-    WeaponESPButton.BackgroundColor3 = Settings.We and on or off
+    State.We = not State.We
+    WeaponESPButton.Text = State.We and "Weapon ESP: ON" or "Weapon ESP: OFF"
+    WeaponESPButton.BackgroundColor3 = State.We and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
     UpdateWeapons()
 end)
 
 AntiFlashButton.MouseButton1Click:Connect(function()
-    Settings.Af = not Settings.Af
-    local on, off = GetThemeColors()
-    AntiFlashButton.Text = Settings.Af and "Anti-Flash: ON" or "Anti-Flash: OFF"
-    AntiFlashButton.BackgroundColor3 = Settings.Af and on or off
+    State.Af = not State.Af
+    AntiFlashButton.Text = State.Af and "Anti-Flash: ON" or "Anti-Flash: OFF"
+    AntiFlashButton.BackgroundColor3 = State.Af and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
 end)
 
 AntiSmokeButton.MouseButton1Click:Connect(function()
-    Settings.As = not Settings.As
-    local on, off = GetThemeColors()
-    AntiSmokeButton.Text = Settings.As and "Anti-Smoke: ON" or "Anti-Smoke: OFF"
-    AntiSmokeButton.BackgroundColor3 = Settings.As and on or off
+    State.As = not State.As
+    AntiSmokeButton.Text = State.As and "Anti-Smoke: ON" or "Anti-Smoke: OFF"
+    AntiSmokeButton.BackgroundColor3 = State.As and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
 end)
 
 BigHeadButton.MouseButton1Click:Connect(function()
-    Settings.He = not Settings.He
-    local on, off = GetThemeColors()
-    BigHeadButton.Text = Settings.He and "Big Head: ON" or "Big Head: OFF"
-    BigHeadButton.BackgroundColor3 = Settings.He and on or off
+    State.He = not State.He
+    BigHeadButton.Text = State.He and "Big Head: ON" or "Big Head: OFF"
+    BigHeadButton.BackgroundColor3 = State.He and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
     UpdateBigHead()
 end)
 
 RemoveWallsButton.MouseButton1Click:Connect(function()
-    Settings.Rw = not Settings.Rw
-    local on, off = GetThemeColors()
-    RemoveWallsButton.Text = Settings.Rw and "Remove Walls: ON" or "Remove Walls: OFF"
-    RemoveWallsButton.BackgroundColor3 = Settings.Rw and on or off
-    ToggleWalls(Settings.Rw)
+    State.Rw = not State.Rw
+    RemoveWallsButton.Text = State.Rw and "Remove Walls: ON" or "Remove Walls: OFF"
+    RemoveWallsButton.BackgroundColor3 = State.Rw and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
+    ToggleWalls(State.Rw)
 end)
 
 local menuKeyWaiting = false
@@ -1473,74 +1048,64 @@ local menuKeyWaiting = false
 MenuKeyButton.MouseButton1Click:Connect(function()
     menuKeyWaiting = true
     MenuKeyButton.Text = "Press key..."
-    local _, _, mainColor = GetThemeColors()
-    MenuKeyButton.BackgroundColor3 = mainColor
+    MenuKeyButton.BackgroundColor3 = Color3.fromRGB(0,120,0)
 end)
 
 MenuKeyReset.MouseButton1Click:Connect(function()
-    Settings.K = Enum.KeyCode.None
+    MenuKey = Enum.KeyCode.None
     MenuKeyButton.Text = "Menu Key: None"
-    local _, off = GetThemeColors()
-    MenuKeyButton.BackgroundColor3 = off
+    MenuKeyButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
 end)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if menuKeyWaiting and input.UserInputType == Enum.UserInputType.Keyboard then
-        Settings.K = input.KeyCode
+        MenuKey = input.KeyCode
         menuKeyWaiting = false
         MenuKeyButton.Text = "Menu Key: " .. tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
-        local _, off = GetThemeColors()
-        MenuKeyButton.BackgroundColor3 = off
+        MenuKeyButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
         return
     end
 
     if gameProcessed then return end
     if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
 
-    if Settings.K ~= Enum.KeyCode.None and input.KeyCode == Settings.K then
+    if MenuKey ~= Enum.KeyCode.None and input.KeyCode == MenuKey then
         if not Exiting and IntroDone then
             MainFrame.Visible = not MainFrame.Visible
             PlayersFrame.Visible = false
-            SettingsFrame.Visible = false
             WarningGui.Visible = false
         end
         return
     end
 
     if Keybinds.ESP ~= Enum.KeyCode.None and input.KeyCode == Keybinds.ESP then
-        Settings.E = not Settings.E
-        local on, off = GetThemeColors()
-        ESPButton.Text = Settings.E and "Player ESP: ON" or "Player ESP: OFF"
-        ESPButton.BackgroundColor3 = Settings.E and on or off
+        State.E = not State.E
+        ESPButton.Text = State.E and "Player ESP: ON" or "Player ESP: OFF"
+        ESPButton.BackgroundColor3 = State.E and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
         UpdateESP()
     elseif Keybinds.WeaponESP ~= Enum.KeyCode.None and input.KeyCode == Keybinds.WeaponESP then
-        Settings.We = not Settings.We
-        local on, off = GetThemeColors()
-        WeaponESPButton.Text = Settings.We and "Weapon ESP: ON" or "Weapon ESP: OFF"
-        WeaponESPButton.BackgroundColor3 = Settings.We and on or off
+        State.We = not State.We
+        WeaponESPButton.Text = State.We and "Weapon ESP: ON" or "Weapon ESP: OFF"
+        WeaponESPButton.BackgroundColor3 = State.We and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
         UpdateWeapons()
     elseif Keybinds.AntiFlash ~= Enum.KeyCode.None and input.KeyCode == Keybinds.AntiFlash then
-        Settings.Af = not Settings.Af
-        local on, off = GetThemeColors()
-        AntiFlashButton.Text = Settings.Af and "Anti-Flash: ON" or "Anti-Flash: OFF"
-        AntiFlashButton.BackgroundColor3 = Settings.Af and on or off
+        State.Af = not State.Af
+        AntiFlashButton.Text = State.Af and "Anti-Flash: ON" or "Anti-Flash: OFF"
+        AntiFlashButton.BackgroundColor3 = State.Af and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
     elseif Keybinds.AntiSmoke ~= Enum.KeyCode.None and input.KeyCode == Keybinds.AntiSmoke then
-        Settings.As = not Settings.As
-        local on, off = GetThemeColors()
-        AntiSmokeButton.Text = Settings.As and "Anti-Smoke: ON" or "Anti-Smoke: OFF"
-        AntiSmokeButton.BackgroundColor3 = Settings.As and on or off
+        State.As = not State.As
+        AntiSmokeButton.Text = State.As and "Anti-Smoke: ON" or "Anti-Smoke: OFF"
+        AntiSmokeButton.BackgroundColor3 = State.As and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
     elseif Keybinds.BigHead ~= Enum.KeyCode.None and input.KeyCode == Keybinds.BigHead then
-        Settings.He = not Settings.He
-        local on, off = GetThemeColors()
-        BigHeadButton.Text = Settings.He and "Big Head: ON" or "Big Head: OFF"
-        BigHeadButton.BackgroundColor3 = Settings.He and on or off
+        State.He = not State.He
+        BigHeadButton.Text = State.He and "Big Head: ON" or "Big Head: OFF"
+        BigHeadButton.BackgroundColor3 = State.He and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
         UpdateBigHead()
     elseif Keybinds.RemoveWalls ~= Enum.KeyCode.None and input.KeyCode == Keybinds.RemoveWalls then
-        Settings.Rw = not Settings.Rw
-        local on, off = GetThemeColors()
-        RemoveWallsButton.Text = Settings.Rw and "Remove Walls: ON" or "Remove Walls: OFF"
-        RemoveWallsButton.BackgroundColor3 = Settings.Rw and on or off
-        ToggleWalls(Settings.Rw)
+        State.Rw = not State.Rw
+        RemoveWallsButton.Text = State.Rw and "Remove Walls: ON" or "Remove Walls: OFF"
+        RemoveWallsButton.BackgroundColor3 = State.Rw and Color3.fromRGB(0,120,0) or Color3.fromRGB(80,80,80)
+        ToggleWalls(State.Rw)
     end
 end)
 
@@ -1605,11 +1170,11 @@ local function ExitScript()
     if ExitStarted then return end
     ExitStarted = true
     Exiting = true
-    Settings.E = false
-    Settings.We = false
-    Settings.Af = false
-    Settings.As = false
-    Settings.He = false
+    State.E = false
+    State.We = false
+    State.Af = false
+    State.As = false
+    State.He = false
 
     for _, data in pairs(Highlights) do
         if data.Highlight and data.Highlight.Parent then
@@ -1627,7 +1192,6 @@ local function ExitScript()
 
     MainFrame.Visible = false
     PlayersFrame.Visible = false
-    SettingsFrame.Visible = false
     WarningGui.Visible = false
 
     local exitText = Instance.new("TextLabel")
@@ -1661,7 +1225,7 @@ CloseButton.MouseButton1Click:Connect(ExitScript)
 task.spawn(function()
     while true do
         if not Exiting then
-            if Settings.E then
+            if State.E then
                 for _, model in pairs(Characters:GetChildren()) do
                     if model:IsA("Model") and model.Name ~= LocalPlayer.Name then
                         if not model:FindFirstChild("PlayerESP") or not model:FindFirstChild("ESPName") then
@@ -1670,16 +1234,16 @@ task.spawn(function()
                     end
                 end
                 UpdateESPColors()
-                if Settings.We then
+                if State.We then
                     UpdateWeapons()
                 end
             end
 
-            if Settings.He and next(PlayerToggles) then
+            if State.He and next(PlayerToggles) then
                 UpdateBigHead()
             end
 
-            if Settings.Rw then
+            if State.Rw then
                 local map = Workspace:FindFirstChild("Map")
                 if map then
                     for _, child in pairs(map:GetChildren()) do
