@@ -19,6 +19,7 @@ local State = {
 }
 
 local MenuKey = Enum.KeyCode.RightControl
+local MenuKeyConn = nil
 
 local Keybinds = {
     ESP = Enum.KeyCode.None,
@@ -35,6 +36,8 @@ local Exiting = false
 local IntroDone = false
 local ExitStarted = false
 
+local KeybindConnections = {}
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "BallsHub"
 ScreenGui.Parent = PlayerGui
@@ -42,8 +45,8 @@ ScreenGui.ResetOnSpawn = false
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0,450,0,520)
-MainFrame.Position = UDim2.new(0.5,-225,0.5,-260)
+MainFrame.Size = UDim2.new(0,450,0,470)
+MainFrame.Position = UDim2.new(0.5,-225,0.5,-235)
 MainFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
 MainFrame.BorderSizePixel = 1
 MainFrame.BorderColor3 = Color3.fromRGB(150,150,150)
@@ -180,10 +183,17 @@ ContentFrame.BorderColor3 = Color3.fromRGB(100,100,100)
 ContentFrame.ZIndex = 2
 ContentFrame.Parent = MainFrame
 
+local function CancelKeybind(name)
+    if KeybindConnections[name] then
+        KeybindConnections[name]:Disconnect()
+        KeybindConnections[name] = nil
+    end
+end
+
 local function CreateFeatureButton(name, text, y, key)
     local button = Instance.new("TextButton")
     button.Name = name .. "Button"
-    button.Size = UDim2.new(0,180,0,35)
+    button.Size = UDim2.new(0,215,0,35)
     button.Position = UDim2.new(0,15,0,y)
     button.BackgroundColor3 = Color3.fromRGB(80,80,80)
     button.BorderSizePixel = 1
@@ -197,13 +207,13 @@ local function CreateFeatureButton(name, text, y, key)
 
     local keybindButton = Instance.new("TextButton")
     keybindButton.Name = name .. "Keybind"
-    keybindButton.Size = UDim2.new(0,130,0,35)
-    keybindButton.Position = UDim2.new(0,205,0,y)
-    keybindButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    keybindButton.Size = UDim2.new(0,155,0,35)
+    keybindButton.Position = UDim2.new(0,240,0,y)
+    keybindButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
     keybindButton.BorderSizePixel = 1
     keybindButton.BorderColor3 = Color3.fromRGB(100,100,100)
     keybindButton.Text = "Key: None"
-    keybindButton.TextColor3 = Color3.fromRGB(200,200,200)
+    keybindButton.TextColor3 = Color3.fromRGB(255,255,255)
     keybindButton.Font = Enum.Font.Legacy
     keybindButton.TextSize = 12
     keybindButton.ZIndex = 3
@@ -212,7 +222,7 @@ local function CreateFeatureButton(name, text, y, key)
     local resetButton = Instance.new("TextButton")
     resetButton.Name = name .. "ResetKey"
     resetButton.Size = UDim2.new(0,35,0,35)
-    resetButton.Position = UDim2.new(0,340,0,y)
+    resetButton.Position = UDim2.new(0,400,0,y)
     resetButton.BackgroundColor3 = Color3.fromRGB(120,40,40)
     resetButton.BorderSizePixel = 1
     resetButton.BorderColor3 = Color3.fromRGB(100,100,100)
@@ -224,37 +234,38 @@ local function CreateFeatureButton(name, text, y, key)
     resetButton.Parent = ContentFrame
 
     keybindButton.MouseButton1Click:Connect(function()
+        CancelKeybind(name)
         keybindButton.Text = "Press key..."
         keybindButton.BackgroundColor3 = Color3.fromRGB(0,120,0)
-        local conn
-        conn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        KeybindConnections[name] = UserInputService.InputBegan:Connect(function(input, gameProcessed)
             if gameProcessed then return end
             if input.UserInputType == Enum.UserInputType.Keyboard then
                 Keybinds[key] = input.KeyCode
                 keybindButton.Text = "Key: " .. tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
-                keybindButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
-                conn:Disconnect()
+                keybindButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
+                CancelKeybind(name)
             end
         end)
     end)
 
     resetButton.MouseButton1Click:Connect(function()
+        CancelKeybind(name)
         Keybinds[key] = Enum.KeyCode.None
         keybindButton.Text = "Key: None"
-        keybindButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
+        keybindButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
     end)
 
     return button
 end
 
-local ESPButton = CreateFeatureButton("ESP", "Player ESP", 15, "ESP")
-local WeaponESPButton = CreateFeatureButton("WeaponESP", "Weapon ESP", 55, "WeaponESP")
-local AntiFlashButton = CreateFeatureButton("AntiFlash", "Anti-Flash", 95, "AntiFlash")
-local AntiSmokeButton = CreateFeatureButton("AntiSmoke", "Anti-Smoke", 135, "AntiSmoke")
+local ESPButton = CreateFeatureButton("ESP", "Player ESP", 10, "ESP")
+local WeaponESPButton = CreateFeatureButton("WeaponESP", "Weapon ESP", 50, "WeaponESP")
+local AntiFlashButton = CreateFeatureButton("AntiFlash", "Anti-Flash", 90, "AntiFlash")
+local AntiSmokeButton = CreateFeatureButton("AntiSmoke", "Anti-Smoke", 130, "AntiSmoke")
 
 local ScopeButton = Instance.new("TextButton")
-ScopeButton.Size = UDim2.new(0,180,0,35)
-ScopeButton.Position = UDim2.new(0,15,0,175)
+ScopeButton.Size = UDim2.new(0,215,0,35)
+ScopeButton.Position = UDim2.new(0,15,0,170)
 ScopeButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
 ScopeButton.BorderSizePixel = 1
 ScopeButton.BorderColor3 = Color3.fromRGB(100,100,100)
@@ -360,8 +371,8 @@ YesButton.MouseButton1Click:Connect(function()
 end)
 
 local BigHeadButton = Instance.new("TextButton")
-BigHeadButton.Size = UDim2.new(0,180,0,35)
-BigHeadButton.Position = UDim2.new(0,15,0,215)
+BigHeadButton.Size = UDim2.new(0,215,0,35)
+BigHeadButton.Position = UDim2.new(0,15,0,210)
 BigHeadButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
 BigHeadButton.BorderSizePixel = 1
 BigHeadButton.BorderColor3 = Color3.fromRGB(100,100,100)
@@ -373,13 +384,13 @@ BigHeadButton.ZIndex = 3
 BigHeadButton.Parent = ContentFrame
 
 local BigHeadKeybind = Instance.new("TextButton")
-BigHeadKeybind.Size = UDim2.new(0,130,0,35)
-BigHeadKeybind.Position = UDim2.new(0,205,0,215)
-BigHeadKeybind.BackgroundColor3 = Color3.fromRGB(60,60,60)
+BigHeadKeybind.Size = UDim2.new(0,155,0,35)
+BigHeadKeybind.Position = UDim2.new(0,240,0,210)
+BigHeadKeybind.BackgroundColor3 = Color3.fromRGB(80,80,80)
 BigHeadKeybind.BorderSizePixel = 1
 BigHeadKeybind.BorderColor3 = Color3.fromRGB(100,100,100)
 BigHeadKeybind.Text = "Key: None"
-BigHeadKeybind.TextColor3 = Color3.fromRGB(200,200,200)
+BigHeadKeybind.TextColor3 = Color3.fromRGB(255,255,255)
 BigHeadKeybind.Font = Enum.Font.Legacy
 BigHeadKeybind.TextSize = 12
 BigHeadKeybind.ZIndex = 3
@@ -387,7 +398,7 @@ BigHeadKeybind.Parent = ContentFrame
 
 local BigHeadReset = Instance.new("TextButton")
 BigHeadReset.Size = UDim2.new(0,35,0,35)
-BigHeadReset.Position = UDim2.new(0,340,0,215)
+BigHeadReset.Position = UDim2.new(0,400,0,210)
 BigHeadReset.BackgroundColor3 = Color3.fromRGB(120,40,40)
 BigHeadReset.BorderSizePixel = 1
 BigHeadReset.BorderColor3 = Color3.fromRGB(100,100,100)
@@ -399,29 +410,30 @@ BigHeadReset.ZIndex = 3
 BigHeadReset.Parent = ContentFrame
 
 BigHeadKeybind.MouseButton1Click:Connect(function()
+    CancelKeybind("BigHead")
     BigHeadKeybind.Text = "Press key..."
     BigHeadKeybind.BackgroundColor3 = Color3.fromRGB(0,120,0)
-    local conn
-    conn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    KeybindConnections["BigHead"] = UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
         if input.UserInputType == Enum.UserInputType.Keyboard then
             Keybinds.BigHead = input.KeyCode
             BigHeadKeybind.Text = "Key: " .. tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
-            BigHeadKeybind.BackgroundColor3 = Color3.fromRGB(60,60,60)
-            conn:Disconnect()
+            BigHeadKeybind.BackgroundColor3 = Color3.fromRGB(80,80,80)
+            CancelKeybind("BigHead")
         end
     end)
 end)
 
 BigHeadReset.MouseButton1Click:Connect(function()
+    CancelKeybind("BigHead")
     Keybinds.BigHead = Enum.KeyCode.None
     BigHeadKeybind.Text = "Key: None"
-    BigHeadKeybind.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    BigHeadKeybind.BackgroundColor3 = Color3.fromRGB(80,80,80)
 end)
 
 local BigHeadSettingsButton = Instance.new("TextButton")
-BigHeadSettingsButton.Size = UDim2.new(0,180,0,35)
-BigHeadSettingsButton.Position = UDim2.new(0,15,0,255)
+BigHeadSettingsButton.Size = UDim2.new(0,215,0,35)
+BigHeadSettingsButton.Position = UDim2.new(0,15,0,250)
 BigHeadSettingsButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
 BigHeadSettingsButton.BorderSizePixel = 1
 BigHeadSettingsButton.BorderColor3 = Color3.fromRGB(100,100,100)
@@ -434,7 +446,7 @@ BigHeadSettingsButton.Parent = ContentFrame
 
 local HeadSliderLabel = Instance.new("TextLabel")
 HeadSliderLabel.Size = UDim2.new(0,50,0,20)
-HeadSliderLabel.Position = UDim2.new(0,15,0,340)
+HeadSliderLabel.Position = UDim2.new(0,15,0,295)
 HeadSliderLabel.BackgroundTransparency = 1
 HeadSliderLabel.Text = "x2"
 HeadSliderLabel.TextColor3 = Color3.fromRGB(255,255,255)
@@ -445,8 +457,8 @@ HeadSliderLabel.ZIndex = 3
 HeadSliderLabel.Parent = ContentFrame
 
 local HeadSlider = Instance.new("Frame")
-HeadSlider.Size = UDim2.new(0,360,0,10)
-HeadSlider.Position = UDim2.new(0,15,0,365)
+HeadSlider.Size = UDim2.new(0,420,0,10)
+HeadSlider.Position = UDim2.new(0,15,0,320)
 HeadSlider.BackgroundColor3 = Color3.fromRGB(100,100,100)
 HeadSlider.BorderSizePixel = 1
 HeadSlider.BorderColor3 = Color3.fromRGB(150,150,150)
@@ -460,11 +472,11 @@ HeadSliderFill.BorderSizePixel = 0
 HeadSliderFill.ZIndex = 4
 HeadSliderFill.Parent = HeadSlider
 
-local RemoveWallsButton = CreateFeatureButton("RemoveWalls", "Remove Walls", 390, "RemoveWalls")
+local RemoveWallsButton = CreateFeatureButton("RemoveWalls", "Remove Walls", 345, "RemoveWalls")
 
 local MenuKeyButton = Instance.new("TextButton")
-MenuKeyButton.Size = UDim2.new(0,180,0,30)
-MenuKeyButton.Position = UDim2.new(0,15,0,430)
+MenuKeyButton.Size = UDim2.new(0,215,0,30)
+MenuKeyButton.Position = UDim2.new(0,15,0,385)
 MenuKeyButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
 MenuKeyButton.BorderSizePixel = 1
 MenuKeyButton.BorderColor3 = Color3.fromRGB(100,100,100)
@@ -475,22 +487,9 @@ MenuKeyButton.TextSize = 12
 MenuKeyButton.ZIndex = 3
 MenuKeyButton.Parent = ContentFrame
 
-local MenuKeyReset = Instance.new("TextButton")
-MenuKeyReset.Size = UDim2.new(0,35,0,30)
-MenuKeyReset.Position = UDim2.new(0,205,0,430)
-MenuKeyReset.BackgroundColor3 = Color3.fromRGB(120,40,40)
-MenuKeyReset.BorderSizePixel = 1
-MenuKeyReset.BorderColor3 = Color3.fromRGB(100,100,100)
-MenuKeyReset.Text = "X"
-MenuKeyReset.TextColor3 = Color3.fromRGB(255,255,255)
-MenuKeyReset.Font = Enum.Font.Legacy
-MenuKeyReset.TextSize = 14
-MenuKeyReset.ZIndex = 3
-MenuKeyReset.Parent = ContentFrame
-
 local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Size = UDim2.new(1,-30,0,20)
-StatusLabel.Position = UDim2.new(0,15,0,465)
+StatusLabel.Position = UDim2.new(0,15,0,420)
 StatusLabel.BackgroundTransparency = 1
 StatusLabel.Text = "Ready"
 StatusLabel.TextColor3 = Color3.fromRGB(255,255,0)
@@ -1046,26 +1045,35 @@ end)
 local menuKeyWaiting = false
 
 MenuKeyButton.MouseButton1Click:Connect(function()
-    menuKeyWaiting = true
-    MenuKeyButton.Text = "Press key..."
-    MenuKeyButton.BackgroundColor3 = Color3.fromRGB(0,120,0)
-end)
-
-MenuKeyReset.MouseButton1Click:Connect(function()
-    MenuKey = Enum.KeyCode.None
-    MenuKeyButton.Text = "Menu Key: None"
-    MenuKeyButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
-end)
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if menuKeyWaiting and input.UserInputType == Enum.UserInputType.Keyboard then
-        MenuKey = input.KeyCode
+    if menuKeyWaiting then
+        if MenuKeyConn then
+            MenuKeyConn:Disconnect()
+            MenuKeyConn = nil
+        end
         menuKeyWaiting = false
-        MenuKeyButton.Text = "Menu Key: " .. tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
+        MenuKeyButton.Text = "Menu Key: " .. tostring(MenuKey):gsub("Enum.KeyCode.", "")
         MenuKeyButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
         return
     end
+    menuKeyWaiting = true
+    MenuKeyButton.Text = "Press key..."
+    MenuKeyButton.BackgroundColor3 = Color3.fromRGB(0,120,0)
+    MenuKeyConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.UserInputType == Enum.UserInputType.Keyboard then
+            MenuKey = input.KeyCode
+            menuKeyWaiting = false
+            MenuKeyButton.Text = "Menu Key: " .. tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
+            MenuKeyButton.BackgroundColor3 = Color3.fromRGB(80,80,80)
+            if MenuKeyConn then
+                MenuKeyConn:Disconnect()
+                MenuKeyConn = nil
+            end
+        end
+    end)
+end)
 
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
 
@@ -1175,6 +1183,15 @@ local function ExitScript()
     State.Af = false
     State.As = false
     State.He = false
+
+    for _, conn in pairs(KeybindConnections) do
+        if conn then conn:Disconnect() end
+    end
+    KeybindConnections = {}
+    if MenuKeyConn then
+        MenuKeyConn:Disconnect()
+        MenuKeyConn = nil
+    end
 
     for _, data in pairs(Highlights) do
         if data.Highlight and data.Highlight.Parent then
